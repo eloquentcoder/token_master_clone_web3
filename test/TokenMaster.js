@@ -46,9 +46,40 @@ describe("TokenMaster", () => {
     });
   });
 
-  describe("Occasions", () => {
+  describe("Occasions", async () => {
     it("sets the occasion count correctly", async () => {
       expect(await tokenMaster.totalOccasionsCount()).to.equal(1);
     });
+
+    it("gets the current occassion", async () => {
+      const occasion = await tokenMaster.getOccasion(1);
+      expect(occasion.id).to.be.equal(1);
+      expect(occasion.name).to.be.equal(OCCASION_NAME);
+      expect(occasion.cost).to.be.equal(OCCASION_COST);
+      expect(occasion.tickets).to.be.equal(OCCASION_MAX_TICKETS);
+      expect(occasion.date).to.be.equal(OCCASION_DATE);
+      expect(occasion.time).to.be.equal(OCCASION_TIME);
+      expect(occasion.location).to.be.equal(OCCASION_LOCATION);
+    });
+  });
+
+  describe("Minting", () => {
+    const ID = 1;
+    const SEAT = 50;
+    const AMOUNT = ethers.utils.parseUnits("1", "ether");
+
+    beforeEach(async () => {
+      const transaction = await tokenMaster
+        .connect(buyer)
+        .mint(ID, SEAT, { value: AMOUNT });
+
+      await transaction.wait();
+    });
+
+    it("updates the ticket count", async () => {
+        const occasion = await tokenMaster.getOccasion(1)
+        expect(occasion.tickets).to.be.equal(OCCASION_MAX_TICKETS - 1);
+    })
+
   });
 });

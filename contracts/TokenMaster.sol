@@ -7,6 +7,7 @@ contract TokenMaster is ERC721 {
 
     address public owner;
     uint256 public totalOccasionsCount = 0;
+    uint256 public totalSupply = 0;
 
     struct Occasion {
         uint256 id;
@@ -20,6 +21,14 @@ contract TokenMaster is ERC721 {
     }
 
     mapping (uint256 => Occasion) occasions;
+    mapping (uint256 => mapping(address => bool)) public hasBought;
+    mapping (uint256 => mapping(uint256 => address)) public seatTakenPerOccasion;
+    mapping (uint256=> uint256[]) seatsTaken;
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
 
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         owner = msg.sender;
@@ -32,7 +41,7 @@ contract TokenMaster is ERC721 {
         string memory _date,
         string memory _time,
         string memory _location
-    ) public {
+    ) public onlyOwner {
         totalOccasionsCount++;
         occasions[totalOccasionsCount] = Occasion(totalOccasionsCount, _name, _cost, _maxTickets, _maxTickets, _date, _time, _location);
     }
@@ -40,6 +49,16 @@ contract TokenMaster is ERC721 {
     function getOccasion(uint id) public view returns (Occasion memory) {
         Occasion memory occasion = occasions[id];
         return occasion;
+    }
+
+    function mint(uint256 _id, uint256 _seat) public payable {
+        
+        occasions[_id].tickets -= 1;
+        hasBought[_id][msg.sender] = true;
+        seatTakenPerOccasion[_id][_seat] = msg.sender;
+        seatsTaken[_id].push(_seat);
+        totalSupply++;
+        _safeMint(msg.sender, totalSupply);
     }
 
 
