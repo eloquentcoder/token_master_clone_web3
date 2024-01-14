@@ -1,5 +1,54 @@
-const { expect } = require("chai")
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+const NAME = "Eloquent Token Master";
+const SYMBOL = "ETM";
+
+const OCCASION_NAME = "Learning web3 by building";
+const OCCASION_COST = ethers.utils.parseUnits("1", "ether");
+const OCCASION_MAX_TICKETS = 100;
+const OCCASION_DATE = "Apr 27";
+const OCCASION_TIME = "10:00AM CST";
+const OCCASION_LOCATION = "Abuja, Nigeria";
 
 describe("TokenMaster", () => {
+  let tokenMaster;
+  let deployer, buyer;
 
-})
+  beforeEach(async () => {
+    [deployer, buyer] = await ethers.getSigners();
+
+    const TokenMaster = await ethers.getContractFactory("TokenMaster");
+    tokenMaster = await TokenMaster.deploy(NAME, SYMBOL);
+
+    const transaction = await tokenMaster
+      .connect(deployer)
+      .list(
+        OCCASION_NAME,
+        OCCASION_COST,
+        OCCASION_MAX_TICKETS,
+        OCCASION_DATE,
+        OCCASION_TIME,
+        OCCASION_LOCATION
+      );
+
+    transaction.wait();
+  });
+
+  describe("Deployment", () => {
+    it("sets the name and symbol", async () => {
+      expect(await tokenMaster.name()).to.equal("Eloquent Token Master");
+      expect(await tokenMaster.symbol()).to.equal("ETM");
+    });
+
+    it("sets the owner", async () => {
+      expect(await tokenMaster.owner()).to.equal(deployer.address);
+    });
+  });
+
+  describe("Occasions", () => {
+    it("sets the occasion count correctly", async () => {
+      expect(await tokenMaster.totalOccasionsCount()).to.equal(1);
+    });
+  });
+});
