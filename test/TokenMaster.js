@@ -97,5 +97,16 @@ describe("TokenMaster", () => {
        expect(seats[0]).to.equal(SEAT);
      });
 
+      it("Updates overall seating status", async () => {
+        const seats = await tokenMaster.getSeatsTaken(ID);
+        expect(seats.length).to.equal(1);
+        expect(seats[0]).to.equal(SEAT);
+      });
+
+      it("Updates the contract balance", async () => {
+        const balance = await ethers.provider.getBalance(tokenMaster.address);
+        expect(balance).to.be.equal(AMOUNT);
+      });
+
   });
 });
