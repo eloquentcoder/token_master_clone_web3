@@ -77,9 +77,25 @@ describe("TokenMaster", () => {
     });
 
     it("updates the ticket count", async () => {
-        const occasion = await tokenMaster.getOccasion(1)
-        expect(occasion.tickets).to.be.equal(OCCASION_MAX_TICKETS - 1);
-    })
+      const occasion = await tokenMaster.getOccasion(1);
+      expect(occasion.tickets).to.be.equal(OCCASION_MAX_TICKETS - 1);
+    });
+
+    it("Updates buying status", async () => {
+      const status = await tokenMaster.hasBought(ID, buyer.address);
+      expect(status).to.be.equal(true);
+    });
+
+     it("Updates seat status", async () => {
+       const owner = await tokenMaster.seatTakenPerOccasion(ID, SEAT);
+       expect(owner).to.equal(buyer.address);
+     });
+
+     it("Updates overall seating status", async () => {
+       const seats = await tokenMaster.getSeatsTaken(ID);
+       expect(seats.length).to.equal(1);
+       expect(seats[0]).to.equal(SEAT);
+     });
 
   });
 });
